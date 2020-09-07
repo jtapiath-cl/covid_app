@@ -4,5 +4,4 @@ gitpython
 requests
 pandas
 numpy
-pdb
 dash==1.15.0
