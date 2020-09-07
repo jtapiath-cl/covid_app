@@ -7,8 +7,7 @@ def git_retrieve(url_source: str, data_folder: str):
     import logging
     from git import Repo
     from datetime import datetime
-    # Importando funciones auxiliares, modulo helpers.py
-    import helpers
+    from src import helpers
     helpers.print_ts(code = 1, text = "Proceso de configuración del repo, comenzando.")
     # Configurando variables de ejecución
     base_path = os.getenv("BASE_APP_PATH")

@@ -3,6 +3,7 @@
 import os
 import numpy as np
 import pandas as pd
+from src import helpers
 # Configurando ejecución
 base_path = os.getenv("BASE_APP_PATH")
 csv_loc = os.path.join(base_path, "data", "data.csv")

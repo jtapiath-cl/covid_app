@@ -10,8 +10,7 @@ def pull_data(data_folder: str, data_prod: str):
     import numpy as np
     import pandas as pd
     from datetime import datetime
-    # Importando funciones auxiliares, modulo helpers.py
-    import helpers
+    from src import helpers
     helpers.print_ts(code = 1, text = "Proceso de configuración de la data, comenzando.")
     # Configurando variables de ejecución
     base_path = os.getenv("BASE_APP_PATH")

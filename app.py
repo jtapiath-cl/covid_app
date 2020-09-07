@@ -11,12 +11,15 @@ import dash_html_components as html
 import plotly.express as px
 import pandas as pd
 
-currentwd = os.getcwd()
-os.chdir(os.path.join(os.path.dirname(__file__), "src"))
-print(os.getcwd())
-from src import setup as stp
-stp.main_function()
-os.chdir(currentwd)
+def update_data():
+    from src import setup as stp
+    from src import setup_env as se
+    from src import setup_git as sg
+    from src import setup_data as sd
+    from src import setup_etl as st
+    from src import helpers
+    stp.main_function()
+    return None
 
 app = dash.Dash(__name__)
 
@@ -39,4 +42,5 @@ app.layout = html.Div(children=[
 
 if __name__ == "__main__":
     # app.run_server(debug = True, host = "0.0.0.0", port = 8050)
+    update_data()
     app.run_server(debug = False, host = "0.0.0.0", port = 8050)

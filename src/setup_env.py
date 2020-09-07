@@ -7,8 +7,7 @@ def set_environment():
     import socket
     import logging
     from datetime import datetime
-    # Importando funciones auxiliares
-    import helpers
+    from src import helpers as helpers
     # Obtengo el hostname de la máquina donde se está ejecutando
     helpers.print_ts(code = 1, text = "Proceso de configuración del ambiente, comenzando.")
     # Configurando la instancia root de logging

@@ -1,18 +1,13 @@
 #!/usr/local/bin/python
 # Shell de configuración del proyecto
 
-import os
-import pdb
-import sys
-
-sys.path.insert(1, os.getcwd())
-
-import setup_env as se
-import setup_git as sg
-import setup_data as sd
-import helpers
-
 def main_function():
+    import pdb
+    # Importo los modulos de app/src
+    from src import setup_env as se
+    from src import setup_git as sg
+    from src import setup_data as sd
+    from src import setup_etl as st
     # Configurando variables de ejecución
     url_git = "https://github.com/MinCiencia/Datos-COVID19.git"
     dir_git = "git_data"
@@ -28,3 +23,5 @@ def main_function():
 
 if __name__ == "__main__":
     main_function()
+else:
+    pass
