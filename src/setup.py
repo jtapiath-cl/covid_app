@@ -1,7 +1,11 @@
 #!/usr/local/bin/python
 # Shell de configuración del proyecto
 
+import os
 import pdb
+import sys
+
+sys.path.insert(1, os.getcwd())
 
 import setup_env as se
 import setup_git as sg

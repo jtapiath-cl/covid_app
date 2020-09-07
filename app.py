@@ -13,8 +13,9 @@ import pandas as pd
 
 currentwd = os.getcwd()
 os.chdir(os.path.join(os.path.dirname(__file__), "src"))
-import setup
-setup.main_function()
+print(os.getcwd())
+from src import setup as stp
+stp.main_function()
 os.chdir(currentwd)
 
 app = dash.Dash(__name__)
