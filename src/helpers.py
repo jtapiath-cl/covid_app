@@ -37,16 +37,23 @@ def check_timediff(date_base: str):
 def print_last_update(data_dict: dict, json_f: str):
     import os
     import json
-    json_loc = os.path.join("/app", "logs", json_f)
+    json_loc = os.path.join(os.getenv("BASE_APP_PATH"), "logs", json_f)
+    try:
+        with open(json_loc, "r") as json_file:
+            data_tmp = json.load(json_file)
+        last_key = int(list(data_tmp)[-1])
+        data_tmp[last_key + 1] = data_dict
+    except:
+        data_tmp = {1: data_dict}
     with open(json_loc, "w") as json_file:
-        json.dump(data_dict, json_file)
+        json.dump(data_tmp, json_file)
     return None
 
 def pull_last_update(json_f: str, field: str):
     import os
     import json
-    json_loc = os.path.join("/app", "logs", json_f)
+    json_loc = os.path.join(os.getenv("BASE_APP_PATH"), "logs", json_f)
     with open(json_loc) as json_file:
         data = json.load(json_file)
-        # print(data)
-        return data[field], data["ts"]
+        last_key = list(data)[-1]
+        return data[last_key][field], data[last_key]["ts"]

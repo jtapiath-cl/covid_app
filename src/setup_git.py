@@ -15,7 +15,7 @@ def git_retrieve(url_source: str, data_folder: str):
     # Configurando la instancia root de logging
     log_fmt = "%(asctime)s - %(process)d - %(levelname)s - %(name)s::%(message)s"
     date_fmt = "%Y-%m-%d %H:%M:%S"
-    log_loc = os.path.join(base_path, "logs", "setup-git.log")
+    log_loc = os.path.join(base_path, "logs", "setup.log")
     json_file = "git_stat.json"
     logging.basicConfig(level = logging.DEBUG, 
                         filename = log_loc, 
@@ -26,7 +26,7 @@ def git_retrieve(url_source: str, data_folder: str):
     logging.info("Configurando el entorno...")
     # Definiendo variables de entorno
     git_url = url_source
-    git_file = os.path.join("/app", data_folder)
+    git_file = os.path.join(base_path, data_folder)
     # Determinando si la ejecución es necesaria: menos de 1 día de la última ejecución
     # no gatillará ejecución
     try:
@@ -42,6 +42,7 @@ def git_retrieve(url_source: str, data_folder: str):
                 logging.info("Se ejecutará el proceso setup_git.py")
     except:
         logging.warning("Se ejecutará por primera vez el proceso setup_git.py")
+        logging.exception("Detalles:")
     # Revisando carpeta para dejar los archivos desde repo GitHub
     try:
         logging.info("Revisando que exista la carpeta de destino para el repo...")
@@ -52,6 +53,7 @@ def git_retrieve(url_source: str, data_folder: str):
         logging.exception("Detalle del error:")
         logging.info("Creando carpeta de datos...")
         os.mkdir(git_file)
+        logging.info("Carpeta de datos creada.")
     # Revisando el estado del repo GitHub
     logging.info("Origen de datos definido en '{0}'".format(git_url))
     try:
@@ -83,6 +85,7 @@ def git_retrieve(url_source: str, data_folder: str):
         if cloned:
             logging.info("Refrescando los datos...")
             Repo(git_file).remotes.origin.pull()
+            logging.info("Datos refrescados.")
         else:
             pass
     except:
@@ -97,10 +100,11 @@ def git_retrieve(url_source: str, data_folder: str):
         # Salida, codigo 10
         raise Exception("Error refrescando los datos. Saliendo con excepcion 10...")
     # Fin del proceso
-    logging.info("Proceso de configuración del repo, completado exitosamente.")
+    logging.info(">>>Proceso de configuración del repo, completado exitosamente.")
     helpers.print_ts(code = 1, text = "Proceso de configuración del repo, completado exitosamente.")
-    # Escribiendo JSON de estado: error con salida 0
+    # Escribiendo JSON de estado: salida 0
     current = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
     status_dict = dict(status = "done", ts = current, exit_code = 0)
     helpers.print_last_update(data_dict = status_dict, json_f = json_file)
+    logging.shutdown()
     return None
