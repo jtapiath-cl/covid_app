@@ -11,6 +11,12 @@ import dash_html_components as html
 import plotly.express as px
 import pandas as pd
 
+currentwd = os.getcwd()
+os.chdir(os.path.basename(__file__), "src")
+import setup
+setup.main_function()
+os.chdir(currentwd)
+
 app = dash.Dash(__name__)
 
 csv_loc = os.path.join(os.getenv("BASE_APP_PATH"), "data", "data.csv")
