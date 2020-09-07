@@ -12,7 +12,7 @@ import plotly.express as px
 import pandas as pd
 
 currentwd = os.getcwd()
-os.chdir(os.path.join(os.path.basename(__file__), "src"))
+os.chdir(os.path.join(os.path.dirname(__file__), "src"))
 import setup
 setup.main_function()
 os.chdir(currentwd)
