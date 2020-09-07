@@ -14,7 +14,15 @@ def set_environment():
     # Configurando la instancia root de logging
     log_fmt = "%(asctime)s - %(process)d - %(levelname)s - %(name)s::%(message)s"
     date_fmt = "%Y-%m-%d %H:%M:%S"
-    log_loc = os.path.join(os.path.join(os.path.dirname(__file__), ".."), "logs", "setup.log")
+    # Ubicacion del log
+    log_fld = os.path.join(os.path.join(os.path.dirname(__file__), ".."), "logs")
+    log_loc = os.path.join(log_fld, "setup.log")
+    # Si la carpeta ../logs no existe, se crea
+    try:
+        helpers.check_file(log_fld)
+    except:
+        os.mkdir(log_fld)
+    # Configurando la instancia de log
     logging.basicConfig(level = logging.DEBUG, 
                         filename = log_loc, 
                         filemode = "a", 
@@ -35,7 +43,7 @@ def set_environment():
     elif host.lower()[:3] == "dwa":
         # Entorno remoto de desarrollo
         logging.info("La app está corriendo en el entorno remoto de desarrollo.")
-        os.environ["BASE_APP_PATH"] = "/home/jtapia/Projects/covid_app"
+        os.environ["BASE_APP_PATH"] = "/home/jtapia/Projects/covid_app/covid_app"
     elif host.lower()[:3] == "prd":
         # Entorno de producción
         logging.info("La app está corriendo en el entorno de producción.")
