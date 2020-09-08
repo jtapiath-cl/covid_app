@@ -17,7 +17,7 @@ def main_function():
     se.set_environment()
     print("Obteniendo datos desde GitHub...", flush = True)
     sg.git_retrieve(url_source = url_git, data_folder = dir_git)
-    print("Obteniendo y manipulando los datos obtenidos...", flush = True)
+    print("Moviendo datos a su ubicación final...", flush = True)
     sd.pull_data(data_folder = dir_git, data_prod = dir_data)
     print("Proceso finalizado.", flush = True)
 
