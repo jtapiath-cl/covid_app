@@ -6,4 +6,4 @@ WORKDIR /app/src
 # RUN python setup.py
 WORKDIR /app
 ENTRYPOINT ["python"]
-CMD ["app.py"]
+CMD ["index.py"]
