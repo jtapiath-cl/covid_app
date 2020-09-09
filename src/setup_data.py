@@ -4,6 +4,7 @@ def pull_data(data_folder: str, data_prod: str):
     """Función para tomar los datos desde el repo GitHub y dejarlos en la
     ubicación de producción."""
     import os
+    import pdb
     import sys
     import shutil 
     import logging
@@ -63,17 +64,38 @@ def pull_data(data_folder: str, data_prod: str):
         os.mkdir(csv_fold)
         logging.info("Carpeta de datos creada.")
     # Leyendo el archivo a un dataframe de Pandas
+    logging.info("Leyendo datos recien cargados...")
     df_tmp = pd.read_csv(data_src)
+    logging.info("Leyendo datos de la ultima corrida exitosa...")
+    df_tmp_2 = pd.read_csv(data_fnl)
+    logging.info("Datos leidos.")
     # Si la última fecha disponible es mayor a la última fecha guardada, se copia a la nueva ubicación
+    logging.info("Obteniendo fechas a comparar...")
     last_dt = max(df_tmp.Fecha)
-    del df_tmp
+    saved_dt = max(df_tmp_2.fecha)
+    saved_dt_json = helpers.pull_last_update(json_f = json_file, field = "last_date")[0]
+    logging.info("La ultima ejecucion obtuvo datos del dia {0}".format(last_dt))
+    logging.info("Los ultimos datos guardados son del dia {0}".format(saved_dt))
+    logging.info("La ultima ejecucion tiene registro de la fecha {0}".format(saved_dt_json))
+    del df_tmp, df_tmp_2
+    # Se revisan las fechas guardadas, por posibles errores de consistencia anteriores
     try:
-        date = helpers.pull_last_update(json_f = json_file, field = "last_date")[0]
+        logging.info("Revisando que las fechas coincidan para la ultima ejecucion guardada...")
+        if saved_dt == saved_dt_json:
+            logging.info("Las fechas coinciden.")
+        else:
+            raise Exception("Las fechas guardadas del ultimo proceso de carga no coinciden.")
+    except:
+        logging.error("Las fechas almacenadas de la ultima ejecucion del proceso no coinciden.")
+        logging.exception("Detalle del error:")
+        logging.info("Se ejecutara el proceso de configuracion setup_data.py")
+    pdb.set_trace()
+    # Se revisan las fechas procesadas para verificar que se debe ejecutar el proceso o se mantiene la fecha anterior
+    try:
         logging.info("Revisando la última fecha procesada...")
-        logging.info("La última ejecución obtuvo datos del día {0}".format(date))
-        if date == None:
+        if saved_dt_json == None:
             logging.info("La última ejecución fue errónea o no existe.")
-            logging.info("Se ejecutará el proceso setup_data.py")
+            raise Exception("La ultima ejecucion fue erronea o no existe.")
         else:
             if last_dt <= date and previous_folder:
                 logging.warning("No se ejecutará el proceso, se trabajará con los datos existentes.")
@@ -83,7 +105,7 @@ def pull_data(data_folder: str, data_prod: str):
                 logging.info("Los datos están desactualizados.")
                 logging.info("Se ejecutará el proceso setup_data.py")
     except:
-        logging.warning("Se ejecutará por primera vez el proceso setup_data.py")
+        logging.warning("Se ejecutará el proceso setup_data.py")
         logging.exception("Detalles:")
     # Copiando archivo fuente a ubicacion objetivo
     try:
