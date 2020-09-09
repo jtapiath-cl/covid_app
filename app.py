@@ -11,4 +11,6 @@ app = dash.Dash(__name__,
                 external_stylesheets=external_stylesheets,
                 suppress_callback_exceptions = True)
 
+app.title = "COVID-19 en Chile"
+
 server = app.server

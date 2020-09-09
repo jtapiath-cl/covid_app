@@ -12,7 +12,7 @@ data_comuna, region_dict, comuna_dict = st.data_etl()
 fig = px.line(data_comuna, x = "fecha", y = "casos", color = "comuna")
 
 layout = html.Div(children=[
-    html.H1(children = "Progresión de contagiados totales por COVID-19 por comuna"),
+    html.H2(children = "Progresión de contagiados totales por COVID-19 por comuna"),
     html.P(children = "Este gráfico muestra la cantidad de contagiados acumulados por informe epidemiológico, por comuna."),
     html.Label(children = "Selecciona una región:"),
     dcc.Dropdown(

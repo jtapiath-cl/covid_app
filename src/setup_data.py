@@ -12,6 +12,7 @@ def pull_data(data_folder: str, data_prod: str):
     import pandas as pd
     from datetime import datetime
     from src import helpers
+    # pdb.set_trace()
     helpers.print_ts(code = 1, text = "Proceso de configuración de la data, comenzando.")
     # Configurando variables de ejecución
     base_path = os.getenv("BASE_APP_PATH")
@@ -64,21 +65,22 @@ def pull_data(data_folder: str, data_prod: str):
         os.mkdir(csv_fold)
         logging.info("Carpeta de datos creada.")
     # Leyendo el archivo a un dataframe de Pandas
-    logging.info("Leyendo datos recien cargados...")
+    logging.info("Leyendo datos recién cargados...")
     df_tmp = pd.read_csv(data_src)
-    logging.info("Leyendo datos de la ultima corrida exitosa...")
+    logging.info("Leyendo datos de la última corrida exitosa...")
     df_tmp_2 = pd.read_csv(data_fnl)
     logging.info("Datos leidos.")
     # Si la última fecha disponible es mayor a la última fecha guardada, se copia a la nueva ubicación
-    logging.info("Obteniendo fechas a comparar...")
+    logging.info("Obteniendo fechas a comparar: última carga, últimos guardados, último registro...")
     last_dt = max(df_tmp.Fecha)
     saved_dt = max(df_tmp_2.fecha)
     saved_dt_json = helpers.pull_last_update(json_f = json_file, field = "last_date")[0]
-    logging.info("La ultima ejecucion obtuvo datos del dia {0}".format(last_dt))
-    logging.info("Los ultimos datos guardados son del dia {0}".format(saved_dt))
-    logging.info("La ultima ejecucion tiene registro de la fecha {0}".format(saved_dt_json))
+    logging.info("La última ejecución obtuvo datos del día {0}".format(last_dt))
+    logging.info("Los últimos datos guardados son del día {0}".format(saved_dt))
+    logging.info("La última ejecución tiene registro de la fecha {0}".format(saved_dt_json))
     del df_tmp, df_tmp_2
     # Se revisan las fechas guardadas, por posibles errores de consistencia anteriores
+    perform_load = False
     try:
         logging.info("Revisando que las fechas coincidan para la ultima ejecucion guardada...")
         if saved_dt == saved_dt_json:
@@ -89,29 +91,37 @@ def pull_data(data_folder: str, data_prod: str):
         logging.error("Las fechas almacenadas de la ultima ejecucion del proceso no coinciden.")
         logging.exception("Detalle del error:")
         logging.info("Se ejecutara el proceso de configuracion setup_data.py")
-    pdb.set_trace()
+        perform_load = True
+    # pdb.set_trace()
     # Se revisan las fechas procesadas para verificar que se debe ejecutar el proceso o se mantiene la fecha anterior
     try:
-        logging.info("Revisando la última fecha procesada...")
-        if saved_dt_json == None:
-            logging.info("La última ejecución fue errónea o no existe.")
-            raise Exception("La ultima ejecucion fue erronea o no existe.")
+        if perform_load:
+            pass
         else:
-            if last_dt <= date and previous_folder:
-                logging.warning("No se ejecutará el proceso, se trabajará con los datos existentes.")
-                helpers.print_ts(code = 2, text = "No se ejecutará el proceso, se trabajará con los datos existentes.")
-                return None
+            logging.info("Revisando la última fecha procesada...")
+            if saved_dt_json == None:
+                logging.info("La última ejecución fue errónea o no existe.")
+                raise Exception("La ultima ejecucion fue erronea o no existe.")
             else:
-                logging.info("Los datos están desactualizados.")
-                logging.info("Se ejecutará el proceso setup_data.py")
+                if last_dt <= saved_dt and previous_folder:
+                    logging.warning("No se ejecutará el proceso, se trabajará con los datos existentes.")
+                    helpers.print_ts(code = 2, text = "No se ejecutará el proceso, se trabajará con los datos existentes.")
+                    return None
+                else:
+                    logging.info("Se ejecutará el proceso setup_data.py")
+                    perform_load = True
     except:
         logging.warning("Se ejecutará el proceso setup_data.py")
-        logging.exception("Detalles:")
-    # Copiando archivo fuente a ubicacion objetivo
+        logging.exception("Detalles del error:")
+    # pdb.set_trace()
+    # Si perform_load es True, copiar archivo fuente a ubicacion objetivo
     try:
-        logging.info("Copiando archivo origen de datos a ubicación final...")
-        shutil.copyfile(data_src, csv_file)
-        logging.info("Archivo copiado.")
+        if not perform_load:
+            pass
+        else:
+            logging.info("Copiando archivo origen de datos a ubicación final...")
+            shutil.copyfile(data_src, csv_file)
+            logging.info("Archivo copiado.")
     except:
         logging.error("Error al copiar el archivo fuente a su ubicación final.")
         logging.exception("Detalle del error:")
