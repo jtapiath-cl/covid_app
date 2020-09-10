@@ -10,6 +10,7 @@ def data_etl():
     csv_loc = os.path.join(base_path, "data", "data.csv")
     # Leyendo datos en Pandas
     df = pd.read_csv(csv_loc)
+    df["fecha"] = pd.to_datetime(df["fecha"], format = "%Y-%m-%d")
     df_reg_tmp = ps.sqldf("SELECT DISTINCT region, cod_region FROM df")
     regiones = df_reg_tmp.to_dict(orient = "records")
     df_com_tmp = ps.sqldf("SELECT DISTINCT comuna, cod_comuna FROM df")

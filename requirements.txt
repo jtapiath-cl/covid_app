@@ -5,4 +5,5 @@ requests
 pandas
 numpy
 pandasql
+dash_bootstrap_components
 dash==1.15.0
