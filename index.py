@@ -2,9 +2,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from src import setup as stp
-stp.main_function()
-
 from app import app
 from apps import app1, app2, sidebar
 
@@ -24,11 +21,28 @@ CONTENT_STYLE = {
     "margin-right": "2rem"
 }
 
-header_item = html.Div(id="header", style = HEADER_STYLE, children = [html.H1(children = "COVID-19 en Chile: un análisis")])
+header_item = html.Div(
+                id="header", 
+                style = HEADER_STYLE, 
+                children = 
+                    [
+                        html.H1(children = "COVID-19 en Chile: un análisis")
+                    ]
+                )
 
-content = html.Div(id="page-content", style = CONTENT_STYLE)
+content = html.Div(
+            id="page-content",
+            style = CONTENT_STYLE
+            )
 
-app.layout = html.Div([dcc.Location(id = "url"), header_item, sidebar.sidebar_layout, content])
+app.layout = html.Div(
+                [
+                    dcc.Location(id = "url"), 
+                    header_item, 
+                    sidebar.sidebar_layout, 
+                    content
+                ]
+            )
 
 # this callback uses the current pathname to set the active state of the
 # corresponding nav link to true, allowing users to tell see page they are on
@@ -56,5 +70,8 @@ def display_page(pathname):
         return "404"
 
 if __name__ == "__main__":
-    app.run_server(debug = False, host = "0.0.0.0", port = 8050,
-                    dev_tools_hot_reload = True)
+    app.run_server(debug = False, 
+        host = "0.0.0.0", 
+        port = 8050,
+        dev_tools_hot_reload = True
+        )
