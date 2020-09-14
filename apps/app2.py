@@ -9,6 +9,22 @@ from app import app
 import pandas as pd
 from src import setup_etl as st
 
+def generate_graph(full_output: bool = False):
+    data_comuna, region_dict, comuna_dict = st.data_etl()
+    fig = px.line(data_comuna, 
+                    x = "fecha", 
+                    y = "casos", 
+                    color = color_default, 
+                    custom_data = custom_default,
+                    labels = dict_labels, 
+                    title = "Casos totales")
+    fig.update_layout(showlegend = False)
+    fig.update_traces(hovertemplate = str_hover)
+    if full_output:
+        return data_comuna, region_dict, comuna_dict, fig
+    else:
+        return fig
+
 parrafo = """
 Este gráfico muestra la evolución de la cantidad total de contagiados a través de la pandemia,
 por comuna, a partir de los informes epidemiológicos publicados por el Ministerio de Salud. La
@@ -23,11 +39,7 @@ str_hover = str_hover_1 + str_hover_2 + "<extra></extra>"
 custom_default = ["region", "comuna"]
 color_default = "comuna"
 
-data_comuna, region_dict, comuna_dict = st.data_etl()
-fig = px.line(data_comuna, x = "fecha", y = "casos", color = color_default, custom_data = custom_default,
-                labels = dict_labels, title = "Casos totales")
-fig.update_layout(showlegend = False)
-fig.update_traces(hovertemplate = str_hover)
+data_comuna, region_dict, comuna_dict, fig = generate_graph(True)
 
 layout = dbc.Container(
     children = 
@@ -39,7 +51,7 @@ layout = dbc.Container(
                     id = "columna-1",
                     children = [
                         html.H2(children = "Contagios totales por COVID-19"),
-                        html.P(children = parrafo)
+                        html.P(children = parrafo, id = "page-desc")
                     ]
                 )
             ]
@@ -50,7 +62,8 @@ layout = dbc.Container(
                 dbc.Col(
                     id = "selectores-region",
                     children = [
-                        html.Label(children = "Selecciona una región:"),
+                        html.Label(children = "Selecciona una o más regiones:",
+                                    id = "small-label"),
                         dcc.Dropdown(
                             id = "regiones",
                             options = [{"label": item["region"], "value": item["cod_region"]} for item in region_dict],
@@ -63,7 +76,8 @@ layout = dbc.Container(
                 dbc.Col(
                     id = "selectores-comuna",
                     children = [
-                        html.Label(children = "Selecciona una o más comunas:"),
+                        html.Label(children = "Selecciona una o más comunas:",
+                                    id = "small-label"),
                         dcc.Dropdown(
                             id = "comunas",
                             options = [{"label": item["comuna"], "value": item["comuna"]} for item in comuna_dict],
@@ -106,6 +120,8 @@ layout = dbc.Container(
                 [Input("regiones", "value"),
                  Input("comunas", "value")])
 def actualizar_regiones(region_flt, comunas_flt):
+    data_comuna, region_dict_tmp, comuna_dict_tmp, fig_tmp = generate_graph(True)
+    del region_dict_tmp, comuna_dict_tmp, fig_tmp
     # Asignaciones de variables para la funcion
     title_txt = None
     color_default = "comuna"
@@ -144,11 +160,15 @@ def actualizar_regiones(region_flt, comunas_flt):
         color_default = "comuna"
         custom_default = ["comuna", "region"]
         if len_comunas == 0:
-            # Una sola región ha sido elegida, se muestran todas las comunas con leyenda
-            data_flt = data_comuna[data_comuna.cod_region.isin(region_flt)]
-            region_nm = data_flt["region"].unique()[0]
-            title_txt = "Casos por comuna, región {0}".format(region_nm)
+            # Estado inicial del gráfico
+            data_tmp = data_comuna.groupby(["region", "cod_region", "fecha"])["casos"].sum().reset_index()
+            data_flt = data_tmp[data_tmp.cod_region.isin(region_flt)]
+            str_hover_1 = "<span style='font-size:16px'><b>Región: %{customdata[0]}</b></span><br><br>"
+            str_hover_2 = "<br>".join(["Fecha: %{x|%d %b %Y}", "Casos: %{y:,}"])
+            color_default = "region"
+            custom_default = ["region"]
             legend_show = True
+            title_txt = "Casos en regiones seleccionadas"
         else:
             # Una sola region ha sido elegida, se muestran solo las comunas elegidas sin leyenda
             data_flt = data_comuna[(data_comuna.cod_region.isin(region_flt)) & (data_comuna.comuna.isin(comunas_flt))]
@@ -198,4 +218,5 @@ def actualizar_selector_comunas(region_flt):
     tmp_df = ps.sqldf("SELECT DISTINCT comuna FROM data_flt")
     tmp_dct = tmp_df.to_dict(orient = "records")
     opt = [{"label": item["comuna"], "value": item["comuna"]} for item in tmp_dct]
+    del data_flt
     return opt

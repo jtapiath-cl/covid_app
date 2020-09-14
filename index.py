@@ -1,44 +1,24 @@
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+
+from src import setup_env as se
+se.set_environment()
+
+import os
+environment = "development"
+os.environ["FLASK_ENV"] = environment
 
 from app import app
-from apps import app1, app2, sidebar
-
-# the styles for the main content position it to the right of the sidebar and
-# add some padding.
-HEADER_STYLE = {
-    "margin-left": "18rem",
-    "margin-right": "2rem",
-    "padding-top": "2rem",
-    "padding-left": "1rem",
-    "padding-bottom": "0.5rem"
-}
-
-CONTENT_STYLE = {
-    "position": "relative",
-    "margin-left": "18rem",
-    "margin-right": "2rem"
-}
-
-header_item = html.Div(
-                id="header", 
-                style = HEADER_STYLE, 
-                children = 
-                    [
-                        html.H1(children = "COVID-19 en Chile: un análisis")
-                    ]
-                )
+from apps import app1, app2, app3, sidebar
 
 content = html.Div(
-            id="page-content",
-            style = CONTENT_STYLE
+            id="page-content"
             )
 
 app.layout = html.Div(
                 [
-                    dcc.Location(id = "url"), 
-                    header_item, 
+                    dcc.Location(id = "url"),
                     sidebar.sidebar_layout, 
                     content
                 ]
@@ -69,8 +49,18 @@ def display_page(pathname):
     else:
         return "404"
 
+@app.callback(
+    Output("collapse", "is_open"),
+    [Input("toggle", "n_clicks")],
+    [State("collapse", "is_open")],
+)
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
 if __name__ == "__main__":
-    app.run_server(debug = False, 
+    app.run_server(debug = True, 
         host = "0.0.0.0", 
         port = 8050,
         dev_tools_hot_reload = True

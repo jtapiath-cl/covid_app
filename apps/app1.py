@@ -10,15 +10,19 @@ from app import app
 import pandas as pd
 from src import setup_etl as st
 
+def generate_data():
+    data_comuna, region_dict, comuna_dict = st.data_etl()
+    data_tbl = data_comuna[["fecha", "region", "comuna", "casos"]]
+    data_tbl["fecha_d"] = data_tbl["fecha"].dt.strftime("%d %b %Y")
+    fechas = [pd.to_datetime(item).strftime("%d %b %Y") for item in data_tbl["fecha"].unique()]
+    return data_tbl, fechas, region_dict, comuna_dict, data_comuna
+
 parrafo = """
 Esta tabla muestra los números totales de contagios por región y comuna. La 
 funcionalidad de selección de fechas está en proceso de implementación."""
 footer = "_Fuente: [Ministerio de Ciencia, Tecnología, Conocimiento e Innovación](https://github.com/MinCiencia/Datos-COVID19)_"
 
-data_comuna, region_dict, comuna_dict = st.data_etl()
-data_tbl = data_comuna[["fecha", "region", "comuna", "casos"]]
-data_tbl["fecha_d"] = data_tbl["fecha"].dt.strftime("%d %b %Y")
-fechas = [pd.to_datetime(item).strftime("%d %b %Y") for item in data_tbl["fecha"].unique()]
+data_tbl, fechas, region_dict, comuna_dict, data_comuna = generate_data()
 
 layout = dbc.Container(
     children = 
@@ -30,7 +34,7 @@ layout = dbc.Container(
                     id = "columna-1",
                     children = [
                         html.H2(children = "Contagios totales por COVID-19"),
-                        html.P(children = parrafo)
+                        html.P(children = parrafo, id = "page-desc")
                     ]
                 )
             ]
@@ -41,7 +45,7 @@ layout = dbc.Container(
                 dbc.Col(
                     id = "selector-region",
                     children = [
-                        html.Label(children = "Selecciona una región:"),
+                        html.Label(children = "Selecciona una región:", id = "small-label"),
                         dcc.Dropdown(
                             id = "regiones-2",
                             options = [{"label": item["region"], "value": item["region"]} for item in region_dict],
@@ -54,7 +58,7 @@ layout = dbc.Container(
                 dbc.Col(
                     id = "selector-comuna",
                     children = [
-                        html.Label(children = "Selecciona una comuna:"),
+                        html.Label(children = "Selecciona una comuna:", id = "small-label"),
                         dcc.Dropdown(
                             id = "comunas-2",
                             options = [{"label": item["comuna"], "value": item["comuna"]} for item in comuna_dict],
@@ -67,17 +71,20 @@ layout = dbc.Container(
                 dbc.Col(
                     id = "selector-fecha",
                     children = [
-                        html.Label(children = "Selecciona un rango de fechas:"),
-                        dcc.RangeSlider(
-                            id = "slider-fechas",
-                            min = 0,
-                            max = len(fechas) - 1,
-                            allowCross = False,
-                            value = [0, len(fechas) - 1],
-                            step = 1
+                        html.Label(children = "Selecciona un rango de fechas:", id = "small-label"),
+                        html.Div(
+                            dcc.RangeSlider(
+                                id = "slider-fechas",
+                                min = 0,
+                                max = len(fechas) - 1,
+                                allowCross = False,
+                                value = [0, len(fechas) - 1],
+                                step = 1
+                            ),
+                            id = "real-selector"
                         ),
                         html.Div(id = "rango-fechas", style = {"display": "flex", "width": "100%", 
-                                                                "padding-bottom": "0.5rem", "font-size": "12px", 
+                                                                "padding-bottom": "0.5rem", "font-size": "10px", 
                                                                 "justify-content": "center"})
                     ],
                     align = "center"
@@ -121,6 +128,8 @@ layout = dbc.Container(
     dash.dependencies.Output("rango-fechas", "children"),
     [dash.dependencies.Input("slider-fechas", "value")])
 def update_output(value):
+    data_tbl_tmp, fechas, region_dict_tmp, comuna_dict_tmp, data_comuna_tmp = generate_data()
+    del data_tbl_tmp, region_dict_tmp, comuna_dict_tmp, data_comuna_tmp
     return dcc.Markdown("Filtrando fechas entre {0} y {1}".format(fechas[value[0]], fechas[value[1]]))
 
 @app.callback(
@@ -129,6 +138,8 @@ def update_output(value):
     dash.dependencies.Input("comunas-2", "value"),
     dash.dependencies.Input("slider-fechas", "value")])
 def update_table(region_flt, comunas_flt, rango_fechas):
+    data_tbl, fechas_tmp, region_dict_tmp, comuna_dict_tmp, data_comuna_tmp = generate_data()
+    del fechas_tmp, region_dict_tmp, comuna_dict_tmp, data_comuna_tmp
     # Obteniendo la cantidad de elementos en los filtros
     # # Regiones
     if region_flt is None or len(region_flt) == 0:
@@ -158,4 +169,5 @@ def actualizar_comunas(region_flt):
         tmp_df = ps.sqldf("SELECT DISTINCT comuna FROM data_flt")
         tmp_dct = tmp_df.to_dict(orient = "records")
         opt = [{"label": item["comuna"], "value": item["comuna"]} for item in tmp_dct]
+        del data_flt
         return opt
