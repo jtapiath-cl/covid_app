@@ -1,6 +1,6 @@
 # Este módulo tiene la función que toma los datos desde GitHub y los lleva a la carpeta app/data
 
-def pull_data(data_folder: str, data_prod: str):
+def pull_data(data_folder: str, data_prod: str, force_exec: bool = False):
     """Función para tomar los datos desde el repo GitHub y dejarlos en la
     ubicación de producción."""
     import os
@@ -81,7 +81,7 @@ def pull_data(data_folder: str, data_prod: str):
         logging.exception("Detalles del error:")
         logging.info("Se ejecutará el proceso de configuracion setup_data.py")
     # Si la última fecha disponible es mayor a la última fecha guardada, se copia a la nueva ubicación
-    if perform_load:
+    if perform_load and not force_exec:
         pass
     else:
         logging.info("Obteniendo fechas a comparar: última carga, últimos guardados, último registro...")
@@ -123,7 +123,7 @@ def pull_data(data_folder: str, data_prod: str):
             logging.warning("Se ejecutará el proceso setup_data.py")
             logging.exception("Detalles del error:")
     try:
-        if not perform_load:
+        if not perform_load and not force_exec:
             pass
         else:
             logging.info("Copiando archivo origen de datos a ubicación final...")

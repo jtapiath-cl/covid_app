@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 # Shell de configuración del proyecto
 
-def main_function():
+def main_function(forceful: bool = False):
     import pdb
     # Importo los modulos de app/src
     from src import setup_env as se
@@ -16,9 +16,9 @@ def main_function():
     print("Configurando entorno de ejecución...", flush = True)
     se.set_environment()
     print("Obteniendo datos desde GitHub...", flush = True)
-    sg.git_retrieve(url_source = url_git, data_folder = dir_git)
+    sg.git_retrieve(url_source = url_git, data_folder = dir_git, force_exec = forceful)
     print("Moviendo datos a su ubicación final...", flush = True)
-    sd.pull_data(data_folder = dir_git, data_prod = dir_data)
+    sd.pull_data(data_folder = dir_git, data_prod = dir_data, force_exec = forceful)
     print("Proceso finalizado.", flush = True)
 
 if __name__ == "__main__":

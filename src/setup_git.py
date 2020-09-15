@@ -1,6 +1,6 @@
 # Este módulo tiene la función que obtiene los datos desde GitHub (https://github.com/MinCiencia/Datos-COVID19.git)
 
-def git_retrieve(url_source: str, data_folder: str):
+def git_retrieve(url_source: str, data_folder: str, force_exec: bool = False):
     """Función para obtener los datos desde el repositorio del MinCiencia"""
     import os
     import sys
@@ -33,7 +33,7 @@ def git_retrieve(url_source: str, data_folder: str):
         if status == "error":
             logging.info("Se ejecutará el proceso setup_git.py.")
         else:
-            if helpers.check_timediff(timestamp) < 1:
+            if helpers.check_timediff(timestamp) < 1 and not force_exec:
                 logging.warning("No se ejecutará el proceso, se trabajará con los datos existentes.")
                 helpers.print_ts(code = 2, text = "No se ejecutará el proceso, se trabajará con los datos existentes.")
                 return None
