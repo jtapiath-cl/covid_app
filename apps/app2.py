@@ -120,8 +120,6 @@ layout = dbc.Container(
                 [Input("regiones", "value"),
                  Input("comunas", "value")])
 def actualizar_regiones(region_flt, comunas_flt):
-    data_comuna, region_dict_tmp, comuna_dict_tmp, fig_tmp = generate_graph(True)
-    del region_dict_tmp, comuna_dict_tmp, fig_tmp
     # Asignaciones de variables para la funcion
     title_txt = None
     color_default = "comuna"

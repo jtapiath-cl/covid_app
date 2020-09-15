@@ -128,8 +128,6 @@ layout = dbc.Container(
     dash.dependencies.Output("rango-fechas", "children"),
     [dash.dependencies.Input("slider-fechas", "value")])
 def update_output(value):
-    data_tbl_tmp, fechas, region_dict_tmp, comuna_dict_tmp, data_comuna_tmp = generate_data()
-    del data_tbl_tmp, region_dict_tmp, comuna_dict_tmp, data_comuna_tmp
     return dcc.Markdown("Filtrando fechas entre {0} y {1}".format(fechas[value[0]], fechas[value[1]]))
 
 @app.callback(
@@ -138,8 +136,6 @@ def update_output(value):
     dash.dependencies.Input("comunas-2", "value"),
     dash.dependencies.Input("slider-fechas", "value")])
 def update_table(region_flt, comunas_flt, rango_fechas):
-    data_tbl, fechas_tmp, region_dict_tmp, comuna_dict_tmp, data_comuna_tmp = generate_data()
-    del fechas_tmp, region_dict_tmp, comuna_dict_tmp, data_comuna_tmp
     # Obteniendo la cantidad de elementos en los filtros
     # # Regiones
     if region_flt is None or len(region_flt) == 0:
