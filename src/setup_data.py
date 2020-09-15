@@ -84,16 +84,22 @@ def pull_data(data_folder: str, data_prod: str, force_exec: bool = False):
         logging.exception("Detalles del error:")
         logging.info("Se ejecutará el proceso de configuracion setup_data.py")
     # Si la última fecha disponible es mayor a la última fecha guardada, se copia a la nueva ubicación
-    if perform_load and not force_exec:
+    if perform_load:
         pass
     else:
         logging.info("Obteniendo fechas a comparar: última carga, últimos guardados, último registro...")
-        saved_dt = max(df_tmp_2.fecha)
-        saved_dt_json = helpers.pull_last_update(json_f = json_file, field = "last_date")[0]
-        logging.info("La última ejecución obtuvo datos del día {0}".format(last_dt))
-        logging.info("Los últimos datos guardados son del día {0}".format(saved_dt))
-        logging.info("La última ejecución tiene registro de la fecha {0}".format(saved_dt_json))
-        del df_tmp, df_tmp_2
+        try:
+            saved_dt = max(df_tmp_2.fecha)
+            saved_dt_json = helpers.pull_last_update(json_f = json_file, field = "last_date")[0]
+            logging.info("La última ejecución obtuvo datos del día {0}".format(last_dt))
+            logging.info("Los últimos datos guardados son del día {0}".format(saved_dt))
+            logging.info("La última ejecución tiene registro de la fecha {0}".format(saved_dt_json))
+            del df_tmp, df_tmp_2
+        except:
+            logging.error("Uno o más de los archivos fuente no existe.")
+            logging.exception("Detalles del error:")
+            logging.info("Se ejecutará el proceso de configuración setup_data.py")
+            perform_load = True
         try:
             logging.info("Revisando que las fechas coincidan para la ultima ejecucion guardada...")
             if saved_dt == saved_dt_json:
