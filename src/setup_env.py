@@ -42,7 +42,7 @@ def set_environment():
     elif host.lower()[:3] == "dwa":
         # Entorno remoto de desarrollo
         logging.info("La app está corriendo en el entorno remoto de desarrollo.")
-        os.environ["BASE_APP_PATH"] = "/mnt/data_proj_volume/covid_app/covid_app"
+        os.environ["BASE_APP_PATH"] = os.getcwd()
     elif host.lower()[:3] == "prd":
         # Entorno de producción
         logging.info("La app está corriendo en el entorno de producción.")
