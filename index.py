@@ -6,7 +6,7 @@ from src import setup_env as se
 se.set_environment()
 
 import os
-environment = "development"
+environment = "production"
 os.environ["FLASK_ENV"] = environment
 
 from app import app
@@ -63,5 +63,5 @@ if __name__ == "__main__":
     app.run_server(debug = True, 
         host = "0.0.0.0", 
         port = 8050,
-        dev_tools_hot_reload = True
+        dev_tools_hot_reload = False
         )
