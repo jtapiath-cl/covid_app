@@ -74,7 +74,10 @@ def pull_data(data_folder: str, data_prod: str, force_exec: bool = False):
         df_tmp_2 = pd.read_csv(data_fnl)
         logging.info("Datos leidos.")
         previous_folder = True
-        perform_load = False
+        if force_exec:
+            pass
+        else:
+            perform_load = False
     except:
         df_tmp_2 = None
         logging.error("No hay datos previos.")
