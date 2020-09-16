@@ -12,9 +12,7 @@ os.environ["FLASK_ENV"] = environment
 from app import app
 from apps import app1, app2, app3, sidebar
 
-content = html.Div(
-            id="page-content"
-            )
+content = html.Div(id="page-content")
 
 app.layout = html.Div(
                 [
@@ -24,8 +22,6 @@ app.layout = html.Div(
                 ]
             )
 
-# this callback uses the current pathname to set the active state of the
-# corresponding nav link to true, allowing users to tell see page they are on
 @app.callback(
     [Output(f"page-{i}-link", "active") for i in range(1, 4)],
     [Input("url", "pathname")],
@@ -33,7 +29,7 @@ app.layout = html.Div(
 def toggle_active_links(pathname):
     if pathname == "/":
         # Treat page 1 as the homepage / index
-        return True, False, False
+        return True, False, False, False
     return [pathname == f"/page-{i}" for i in range(1, 4)]
 
 
@@ -43,11 +39,15 @@ def toggle_active_links(pathname):
 )
 def display_page(pathname):
     if pathname in ["/", "/page-1"]:
-        return app1.layout
-    elif pathname == "/page-2":
         return app2.layout
+    elif pathname == "/page-2":
+        return app1.layout
+    elif pathname == "/page-3":
+        return app3.layout
+    elif pathname == "/page-4":
+        return app4.layout
     else:
-        return "404"
+        return "404: Not found"
 
 @app.callback(
     Output("collapse", "is_open"),
