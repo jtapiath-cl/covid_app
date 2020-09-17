@@ -4,23 +4,80 @@ import plotly.express as px
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+from dash_table import Format as dtf
 
 from app import app
 
 import pandas as pd
 from src import setup_etl as st
 
+def get_formatted_date(prev_date: str):
+    return prev_date.strftime("%d %b %Y")
+
 def generate_data():
     data_comuna, region_dict, comuna_dict = st.data_etl()
     data_tbl = data_comuna[["fecha", "region", "comuna", "casos"]]
-    data_tbl["fecha_d"] = data_tbl["fecha"].dt.strftime("%d %b %Y")
+    fechas_tmp = data_tbl.apply(lambda row: get_formatted_date(row.fecha), axis = 1)
+    data_tbl = data_tbl.assign(fecha_d = fechas_tmp)
     fechas = [pd.to_datetime(item).strftime("%d %b %Y") for item in data_tbl["fecha"].unique()]
+    del fechas_tmp
     return data_tbl, fechas, region_dict, comuna_dict, data_comuna
 
+def generador_tabla(tipo: int, df: pd.DataFrame):
+    if tipo == 1:
+        # tipo == 1 : grafico a nivel de fecha
+        ret_tbl = True
+        groupbys = ["fecha", "fecha_d"]
+        columnas_req = [{"name": "Fecha", "id": "fecha_d", "type": "datetime"},
+                        {"name": "Casos", "id": "casos", "type": "numeric", "format": dtf.Format(group = ",")}]
+        data_tbl = df.groupby(groupbys)["casos"].sum() \
+                    .reset_index() \
+                    .sort_values(by = ["fecha"])
+    elif tipo == 2:
+        # tipo == 2 : grafico a nivel de region
+        ret_tbl = True
+        groupbys = ["fecha", "fecha_d", "region"]
+        columnas_req = [{"name": "Fecha", "id": "fecha_d", "type": "datetime"},
+                        {"name": "Región", "id": "region", "type": "text"},
+                        {"name": "Casos", "id": "casos", "type": "numeric", "format": dtf.Format(group = ",")}]
+        data_tbl = df.groupby(groupbys)["casos"].sum() \
+                    .reset_index() \
+                    .sort_values(by = ["fecha"])
+    elif tipo == 3:
+        # tipo == 3 : grafico a nivel de comuna
+        ret_tbl = True
+        groupbys = ["fecha", "fecha_d", "region", "comuna"]
+        columnas_req = [{"name": "Fecha", "id": "fecha_d", "type": "datetime"},
+                        {"name": "Región", "id": "region", "type": "text"},
+                        {"name": "Comuna", "id": "comuna", "type": "text"},
+                        {"name": "Casos", "id": "casos", "type": "numeric", "format": dtf.Format(group = ",")}]
+        data_tbl = df.groupby(groupbys)["casos"].sum() \
+                        .reset_index() \
+                        .sort_values(by = ["fecha", "comuna"])
+    else:
+        # otro tipo : retorna un texto
+        ret_tbl = False
+        texto = "Error en la selección"
+    if ret_tbl:
+        tabla = dash_table.DataTable(
+                    id="tabla-contagios",
+                    columns = columnas_req,
+                    data = data_tbl.to_dict(orient = "records"),
+                    page_size = 40
+                )
+    else:
+        tabla = texto
+    return tabla
+
 parrafo = """
-Esta tabla muestra los números totales de contagios por región y comuna. La 
-funcionalidad de selección de fechas está en proceso de implementación."""
+Esta tabla muestra los números totales de contagios por fecha, región y comuna. Se puede seleccionar
+sólo una región, y dentro de ella, sólo una comuna. La cantidad de casos en la columna "Casos"
+es la cantidad de contagios totales a la fecha del informe epidemiológico respectivo.
+"""
 footer = "_Fuente: [Ministerio de Ciencia, Tecnología, Conocimiento e Innovación](https://github.com/MinCiencia/Datos-COVID19)_"
+
+region_selec = None
+comuna_selec = None
 
 data_tbl, fechas, region_dict, comuna_dict, data_comuna = generate_data()
 
@@ -33,7 +90,7 @@ layout = dbc.Container(
                 dbc.Col(
                     id = "columna-1",
                     children = [
-                        html.H2(children = "Contagios totales por COVID-19"),
+                        html.H2(children = "Contagios totales"),
                         html.P(children = parrafo, id = "page-desc")
                     ]
                 )
@@ -93,24 +150,7 @@ layout = dbc.Container(
         ),
         dbc.Row(
             id = "fila-2-tabla",
-            children = [
-                dbc.Col(
-                    id = "columna-1-grafico",
-                    children = [
-                        dash_table.DataTable(
-                            id="tabla-contagios",
-                            columns = [
-                                {"name": "Fecha", "id": "fecha_d", "type": "datetime"},
-                                {"name": "Región", "id": "region", "type": "text"},
-                                {"name": "Comuna", "id": "comuna", "type": "text"},
-                                {"name": "Casos", "id": "casos", "type": "numeric"}
-                            ],
-                            data = data_tbl.to_dict(orient = "records"),
-                            page_size = 40
-                        )
-                    ]
-                )
-            ]
+            children = [dbc.Col(id = "columna-1-tabla")]
         ),
         dbc.Row(
             id = "fila-3-footer",
@@ -131,29 +171,6 @@ def update_output(value):
     return dcc.Markdown("Filtrando fechas entre {0} y {1}".format(fechas[value[0]], fechas[value[1]]))
 
 @app.callback(
-    dash.dependencies.Output("tabla-contagios", "data"),
-    [dash.dependencies.Input("regiones-2", "value"),
-    dash.dependencies.Input("comunas-2", "value"),
-    dash.dependencies.Input("slider-fechas", "value")])
-def update_table(region_flt, comunas_flt, rango_fechas):
-    # Obteniendo la cantidad de elementos en los filtros
-    # # Regiones
-    if region_flt is None or len(region_flt) == 0:
-        cond_1 = data_tbl.region.notna()
-    else:
-        cond_1 = data_tbl.region == region_flt
-    # # Comunas
-    if comunas_flt is None or len(comunas_flt) == 0:
-        cond_2 = data_tbl.comuna.notna()
-    else:
-        cond_2 = data_tbl.comuna == comunas_flt
-    # Logica de filtrado
-    fecha_min = pd.to_datetime(fechas[rango_fechas[0]], format = "%d %b %Y")
-    fecha_max = pd.to_datetime(fechas[rango_fechas[1]], format = "%d %b %Y")
-    rango_flt = (data_tbl["fecha"] >= fecha_min) & (data_tbl["fecha"] <= fecha_max)
-    return data_tbl[(cond_1) & (cond_2) & (rango_flt) & (data_tbl.casos > 0)].to_dict(orient = "records")
-
-@app.callback(
     dash.dependencies.Output("comunas-2", "options"), 
     [dash.dependencies.Input("regiones-2", "value")])
 def actualizar_comunas(region_flt):
@@ -167,3 +184,60 @@ def actualizar_comunas(region_flt):
         opt = [{"label": item["comuna"], "value": item["comuna"]} for item in tmp_dct]
         del data_flt
         return opt
+
+@app.callback(
+    dash.dependencies.Output("columna-1-tabla", "children"),
+    [dash.dependencies.Input("regiones-2", "value"),
+    dash.dependencies.Input("comunas-2", "value"),
+    dash.dependencies.Input("slider-fechas", "value")])
+def update_table(region_flt, comunas_flt, rango_fechas):
+    global region_selec
+    global comuna_selec
+    if region_selec == region_flt:
+        # No ha cambiado la region
+        execute = True
+    else:
+        # Cambio la seleccion de region
+        if region_flt is None:
+            # Se limpio la region
+            tipo = 1
+            execute = False
+            region_selec = region_flt
+            cond_1 = data_tbl.region.notna()
+            cond_2 = data_tbl.comuna.notna()
+        else:
+            # Solo cambio la region
+            tipo = 2
+            execute = False
+            region_selec = region_flt
+            cond_1 = data_tbl.region == region_flt
+            cond_2 = data_tbl.comuna.notna()
+    if execute:
+        # Tipo de tabla a mostrar
+        tipo = 0
+        if region_flt is None or len(region_flt) == 0:
+            tipo = 1
+        else:
+            if comunas_flt is None or len(comunas_flt) == 0:
+                tipo = 2
+            else:
+                tipo = 3
+        # # Regiones
+        if region_flt is None or len(region_flt) == 0:
+            cond_1 = data_tbl.region.notna()
+        else:
+            cond_1 = data_tbl.region == region_flt
+        # # Comunas
+        if comunas_flt is None or len(comunas_flt) == 0:
+            cond_2 = data_tbl.comuna.notna()
+        else:
+            comuna_selec = comunas_flt
+            cond_2 = data_tbl.comuna == comunas_flt
+    else:
+        pass
+    # Logica de filtrado
+    fecha_min = pd.to_datetime(fechas[rango_fechas[0]], format = "%d %b %Y")
+    fecha_max = pd.to_datetime(fechas[rango_fechas[1]], format = "%d %b %Y")
+    rango_flt = (data_tbl["fecha"] >= fecha_min) & (data_tbl["fecha"] <= fecha_max)
+    return_df = data_tbl[(cond_1) & (cond_2) & (rango_flt) & (data_tbl.casos > 0)]
+    return generador_tabla(tipo = tipo, df = return_df)
