@@ -6,7 +6,6 @@ from dash.dependencies import Input, Output, State
 
 from app import app
 
-# the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {
     "position": "fixed",
     "top": 0,
@@ -24,19 +23,15 @@ sidebar_header = dbc.Row(
             html.Button(
                 html.Span(className="navbar-toggler-icon"),
                 className="navbar-toggler",
-                # the navbar-toggler classes don't set color, so we do it here
                 style={
                     "color": "rgba(0,0,0,.5)",
                     "border-color": "rgba(0,0,0,.1)",
                 },
-                id="toggle",
+                id="toggle"
             ),
-            # the column containing the toggle will be only as wide as the
-            # toggle, resulting in the toggle being right aligned
             width="auto",
-            # vertically align the toggle in the center
-            align="center",
-        ),
+            align="center"
+        )
     ]
 )
 
@@ -60,7 +55,7 @@ sidebar_layout = html.Div(
                     dbc.NavLink("Análisis", href = "/page-4", id = "page-4-link")
                 ],
                 vertical=True,
-                pills=True,
+                pills=True
             ),
             id = "collapse"
         )
