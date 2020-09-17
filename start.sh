@@ -2,6 +2,8 @@
 
 git pull
 
+python3 setup.py
+
 docker build \
     -t covid_app:latest \
     .
