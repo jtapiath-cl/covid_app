@@ -1,5 +1,10 @@
-environment = "development"
-isdev = True
+environment = "production"
+isdev = False
+
+if isdev:
+    run_port = 8030
+else:
+    run_port = 8050
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -64,6 +69,6 @@ def toggle_collapse(n, is_open):
 if __name__ == "__main__":
     app.run_server(debug = isdev, 
         host = "0.0.0.0", 
-        port = 8030,
+        port = run_port,
         dev_tools_hot_reload = isdev
     )
