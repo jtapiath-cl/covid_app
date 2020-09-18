@@ -1,17 +1,21 @@
+import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+
 from dash.dependencies import Input, Output
 
 from app import app
-
-import pandas as pd
 from src import setup_etl as st
 
-def generate_graph(full_output: bool = False):
+def get_formatted_date(prev_date: str):
+    return prev_date.strftime("%d %b %Y")
+
+def generate_graph():
     data_comuna, region_dict, comuna_dict = st.data_etl()
-    fig = px.line(data_comuna, 
+    data_tbl = data_comuna[["fecha", "region", "comuna", "casos", "cod_region"]]
+    fig = px.line(data_tbl, 
                     x = "fecha", 
                     y = "casos", 
                     color = color_default, 
@@ -20,10 +24,11 @@ def generate_graph(full_output: bool = False):
                     title = "Casos totales")
     fig.update_layout(showlegend = False)
     fig.update_traces(hovertemplate = str_hover)
-    if full_output:
-        return data_comuna, region_dict, comuna_dict, fig
-    else:
-        return fig
+    fechas_tmp = data_tbl.apply(lambda row: get_formatted_date(row.fecha), axis = 1)
+    data_tbl = data_tbl.assign(fecha_d = fechas_tmp)
+    fechas = [pd.to_datetime(item).strftime("%d %b %Y") for item in data_tbl["fecha"].unique()]
+    del fechas_tmp, data_comuna
+    return data_tbl, region_dict, comuna_dict, fig, fechas
 
 def generar_grafico(df: pd.DataFrame, regiones: bool = False, comunas: bool = False,
                     region_flt = None, comunas_flt = None):
@@ -72,7 +77,7 @@ def generar_grafico(df: pd.DataFrame, regiones: bool = False, comunas: bool = Fa
     if error:
         pass
     else:
-        child = dcc.Graph(id = "contagios_comuna",
+        child = dcc.Graph(id = "contagios-comuna",
                             figure = fig,
                             responsive = "auto")
     return child
@@ -93,33 +98,33 @@ color_default = "comuna"
 region_selec = None
 comuna_selec = None
 
-data_comuna, region_dict, comuna_dict, fig = generate_graph(True)
+data_comuna, region_dict, comuna_dict, fig, fechas = generate_graph()
 
 layout = dbc.Container(
     children = 
     [
         dbc.Row(
-            id = "fila-1-intro",
+            id = "pag-2-fila-1-intro",
             children = [
                 dbc.Col(
-                    id = "columna-1",
+                    id = "pag-2-columna-1",
                     children = [
                         html.H2(children = "Evolución de contagios"),
-                        html.P(children = parrafo, id = "page-desc")
+                        html.P(children = parrafo, id = "pag-2-page-desc")
                     ]
                 )
             ]
         ),
         dbc.Row(
-            id = "fila-2-selectores",
+            id = "pag-2-fila-2-selectores",
             children = [
                 dbc.Col(
-                    id = "selectores-region",
+                    id = "pag-2-selectores-region",
                     children = [
                         html.Label(children = "Selecciona una o más regiones:",
-                                    id = "small-label"),
+                                    id = "pag-2-small-label-regiones"),
                         dcc.Dropdown(
-                            id = "regiones",
+                            id = "pag-2-regiones",
                             options = [{"label": item["region"], "value": item["cod_region"]} for item in region_dict],
                             value = None,
                             multi = True,
@@ -128,30 +133,51 @@ layout = dbc.Container(
                     ]
                 ),
                 dbc.Col(
-                    id = "selectores-comuna",
+                    id = "pag-2-selectores-comuna",
                     children = [
                         html.Label(children = "Selecciona una o más comunas:",
-                                    id = "small-label"),
+                                    id = "pag-2-small-label-comunas"),
                         dcc.Dropdown(
-                            id = "comunas",
+                            id = "pag-2-comunas",
                             options = [{"label": item["comuna"], "value": item["comuna"]} for item in comuna_dict],
                             multi = True,
                             value = None,
                             placeholder = "Comuna..."
                         )
                     ]
+                ),
+                dbc.Col(
+                    id = "pag-2-selector-fecha",
+                    children = [
+                        html.Label(children = "Selecciona un rango de fechas:", id = "pag-2-small-label-fecha"),
+                        html.Div(
+                            dcc.RangeSlider(
+                                id = "pag-2-slider-fechas",
+                                min = 0,
+                                max = len(fechas) - 1,
+                                allowCross = False,
+                                value = [0, len(fechas) - 1],
+                                step = 1
+                            ),
+                            id = "pag-2-real-selector"
+                        ),
+                        html.Div(id = "pag-2-rango-fechas", style = {"display": "flex", "width": "100%", 
+                                                                        "padding-bottom": "0.5rem", "font-size": "10px", 
+                                                                        "justify-content": "center"})
+                    ],
+                    align = "center"
                 )
             ]
         ),
         dbc.Row(
-            id = "fila-3-grafico",
-            children = [dbc.Col(id = "columna-1-grafico")]
+            id = "pag-2-fila-3-grafico",
+            children = [dbc.Col(id = "pag-2-columna-1-grafico")]
         ),
         dbc.Row(
-            id = "fila-4-footer",
+            id = "pag-2-fila-4-footer",
             children = [
                 dbc.Col(
-                    id = "columna-1-footer",
+                    id = "pag-2-columna-1-footer",
                     children = [dcc.Markdown(children = footer)]
                 )
             ]
@@ -159,8 +185,18 @@ layout = dbc.Container(
     ]
 )
 
-@app.callback(Output("comunas", "options"), 
-                [Input("regiones", "value")])
+@app.callback(
+    Output("pag-2-rango-fechas", "children"),
+    Input("pag-2-slider-fechas", "value")
+)
+def update_output(value):
+    return dcc.Markdown("Filtrando fechas entre {0} y {1}".format(fechas[value[0]], fechas[value[1]]))
+
+
+@app.callback(
+    Output("pag-2-comunas", "options"), 
+    Input("pag-2-regiones", "value")
+)
 def actualizar_selector_comunas(region_flt):
     import pandasql as ps
     if region_flt == None:
@@ -172,10 +208,15 @@ def actualizar_selector_comunas(region_flt):
     del data_flt
     return opt
 
-@app.callback(Output("columna-1-grafico", "children"), 
-                [Input("regiones", "value"),
-                 Input("comunas", "value")])
-def actualizar_regiones(region_flt, comunas_flt):
+@app.callback(
+    Output("pag-2-columna-1-grafico", "children"), 
+    [
+        Input("pag-2-regiones", "value"),
+        Input("pag-2-comunas", "value"),
+        Input("pag-2-slider-fechas", "value")
+    ]
+)
+def actualizar_regiones(region_flt, comunas_flt, rango_fechas):
     global region_selec
     global comuna_selec
     region_bool = False
@@ -209,7 +250,11 @@ def actualizar_regiones(region_flt, comunas_flt):
             comuna_bool = True
         else:
             pass
-    return generar_grafico(df = data_comuna, regiones = region_bool,
+    fecha_min = pd.to_datetime(fechas[rango_fechas[0]], format = "%d %b %Y")
+    fecha_max = pd.to_datetime(fechas[rango_fechas[1]], format = "%d %b %Y")
+    rango_flt = (data_comuna["fecha"] >= fecha_min) & (data_comuna["fecha"] <= fecha_max)
+    data_flt = data_comuna[rango_flt]
+    return generar_grafico(df = data_flt, regiones = region_bool,
                             comunas = comuna_bool, region_flt = region_flt,
                             comunas_flt = comunas_flt)
 

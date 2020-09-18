@@ -49,8 +49,8 @@ sidebar_layout = html.Div(
         dbc.Collapse(
             dbc.Nav(
                 [
-                    dbc.NavLink("Gráfico comparativo", href = "/page-1", id = "page-1-link"),
-                    dbc.NavLink("Tabla de datos", href = "/page-2", id = "page-2-link"),
+                    dbc.NavLink("Evolución", href = "/page-1", id = "page-1-link"),
+                    dbc.NavLink("Totales", href = "/page-2", id = "page-2-link"),
                     dbc.NavLink("Incrementos", href = "/page-3", id = "page-3-link"),
                     dbc.NavLink("Análisis", href = "/page-4", id = "page-4-link")
                 ],
