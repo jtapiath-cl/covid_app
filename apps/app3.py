@@ -93,7 +93,6 @@ def generar_tabla(df: pd.DataFrame, regiones: bool = False, comunas: bool = Fals
         data_tmp = df[flt]
         grps = ["region", "cod_region", "fecha", "fecha_d"]
         columnas_tbl = [{"name": "Fecha", "id": "fecha_d", "type": "datetime"},
-                        {"name": "Región", "id": "region", "type": "text"},
                         {"name": "Casos", "id": "casos", "type": "numeric", "format": dtf.Format(group = ",")}]
     elif regiones and comunas:
         flt_1 = df.cod_region == region_flt
@@ -101,8 +100,6 @@ def generar_tabla(df: pd.DataFrame, regiones: bool = False, comunas: bool = Fals
         data_tmp = df[(flt_1) & (flt_2)]
         grps = ["region", "cod_region", "comuna", "fecha", "fecha_d"]
         columnas_tbl = [{"name": "Fecha", "id": "fecha_d", "type": "datetime"},
-                        {"name": "Región", "id": "region", "type": "text"},
-                        {"name": "Comuna", "id": "comuna", "type": "text"},
                         {"name": "Casos", "id": "casos", "type": "numeric", "format": dtf.Format(group = ",")}]
     else:
         error = True
@@ -110,7 +107,8 @@ def generar_tabla(df: pd.DataFrame, regiones: bool = False, comunas: bool = Fals
     if error:
         pass
     else:
-        data_grp = data_tmp.groupby(grps)["casos"] \
+        data_grp = data_tmp \
+                    .groupby(grps)["casos"] \
                     .sum() \
                     .diff(periods = 1) \
                     .reset_index()
@@ -207,7 +205,7 @@ layout = dbc.Container(
             id = "pag-3-fila-3-grafico",
             children = 
                 [
-                    dbc.Col(id = "pag-3-columna-2-grafico"),
+                    dbc.Col(id = "pag-3-columna-2-grafico", width = 8),
                     dbc.Col(id = "pag-3-columna-2-tabla")
                 ]
         ),

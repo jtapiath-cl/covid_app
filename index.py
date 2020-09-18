@@ -1,9 +1,10 @@
-environment = "production"
 isdev = False
 
 if isdev:
+    environment = "development"
     run_port = 8030
 else:
+    environment = "production"
     run_port = 8050
 
 import dash_core_components as dcc
