@@ -5,12 +5,17 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from app import app
+from analisis import post_1_magallanes as contenido
 
 parrafo = """
-La intención de este análisis es entregar una mirada rápida respecto de la efectividad
+La intención de esta sección es entregar una mirada rápida respecto de la efectividad
 de las políticas públicas que se han definido en Chile para manejar la pandemia, desde
-la perspectiva de los contagios totales."""
+la perspectiva de las técnicas del análisis y la ciencia de datos."""
 footer = "_Fuente: [Ministerio de Ciencia, Tecnología, Conocimiento e Innovación](https://github.com/MinCiencia/Datos-COVID19)_"
+
+## ===
+contenido_analisis = contenido.layout
+## ===
 
 layout = dbc.Container(
     children = 
@@ -31,11 +36,12 @@ layout = dbc.Container(
             id = "fila-3-grafico",
             children = 
                 [
-                    dbc.Col(id = "columna-2-grafico",
+                    dbc.Col(id = "columna-2-contenido",
                                 children = 
                                 [
                                     html.Br(),
-                                    dcc.Markdown("***En construcción...***"),
+                                    html.Div(id = "contenido-analisis", 
+                                                children = contenido_analisis),
                                     html.Br()
                                 ]
                     )
