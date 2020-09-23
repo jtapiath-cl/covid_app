@@ -1,3 +1,6 @@
 logs/
 git_data/
 data/
+analisis/__pycache__/
+apps/__pycache__/
+src/__pycache__/
