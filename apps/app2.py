@@ -82,9 +82,17 @@ def generar_grafico(df: pd.DataFrame, regiones: bool = False, comunas: bool = Fa
                             responsive = "auto")
     return child
 
-parrafo = """
-Este gráfico muestra la evolución de la cantidad total de contagiados a través de la pandemia,
-por comuna, a partir de los informes epidemiológicos publicados por el Ministerio de Salud."""
+parrafo_1 = """Este gráfico muestra la evolución de la cantidad total de contagiados a través 
+de la pandemia, por comuna, a partir de los informes epidemiológicos publicados por el Ministerio
+de Salud. En esta sección se pueden comparar varias regiones o comunas; comienza por seleccionar
+una región y un rango de fechas de los filtros que aparecen abajo."""
+parrafo_2 = """Los datos aquí presentados muestran sólo la cantidad de contagios confirmados totales, 
+a nivel de comuna. Otras métricas, como la cantidad de sospechas o de fallecimientos, serán incluidos en
+futuras iteraciones de la aplicación."""
+parrafo_3 = """Es importante notar que la fuente de datos para estos gráficos son los informes epidemiológicos,
+por lo que los datos no están disponibles diariamente, y por tanto, no pueden compararse fácilmente
+con la información entregada en los reportes que realiza tres veces a la semana el Ministerio."""
+parrafo = [html.Br(), html.P(parrafo_1), html.P(parrafo_2), html.P(parrafo_3)]
 footer = "_Fuente: [Ministerio de Ciencia, Tecnología, Conocimiento e Innovación](https://github.com/MinCiencia/Datos-COVID19)_"
 
 dict_labels = {"comuna": "Comuna", "casos": "# de contagios", "fecha": "Fecha del informe", "region": "Región"}
@@ -115,69 +123,76 @@ layout = dbc.Container(
                 )
             ]
         ),
-        dbc.Row(
-            id = "pag-2-fila-2-selectores",
+        dbc.Jumbotron(
             children = [
-                dbc.Col(
-                    id = "pag-2-selectores-region",
+                dbc.Row(
+                    id = "pag-2-fila-2-selectores",
                     children = [
-                        html.Label(children = "Selecciona una o más regiones:",
-                                    id = "pag-2-small-label-regiones"),
-                        dcc.Dropdown(
-                            id = "pag-2-regiones",
-                            options = [{"label": item["region"], "value": item["cod_region"]} for item in region_dict],
-                            value = None,
-                            multi = True,
-                            placeholder = "Región..."
-                        )
-                    ]
-                ),
-                dbc.Col(
-                    id = "pag-2-selectores-comuna",
-                    children = [
-                        html.Label(children = "Selecciona una o más comunas:",
-                                    id = "pag-2-small-label-comunas"),
-                        dcc.Dropdown(
-                            id = "pag-2-comunas",
-                            options = [{"label": item["comuna"], "value": item["comuna"]} for item in comuna_dict],
-                            multi = True,
-                            value = None,
-                            placeholder = "Comuna..."
-                        )
-                    ]
-                ),
-                dbc.Col(
-                    id = "pag-2-selector-fecha",
-                    children = [
-                        html.Label(children = "Selecciona un rango de fechas:", id = "pag-2-small-label-fecha"),
-                        html.Div(
-                            dcc.RangeSlider(
-                                id = "pag-2-slider-fechas",
-                                min = 0,
-                                max = len(fechas) - 1,
-                                allowCross = False,
-                                value = [0, len(fechas) - 1],
-                                step = 1
-                            ),
-                            id = "pag-2-real-selector"
+                        dbc.Col(
+                            id = "pag-2-selectores-region",
+                            children = [
+                                html.Label(children = "Selecciona una o más regiones:",
+                                            id = "pag-2-small-label-regiones"),
+                                dcc.Dropdown(
+                                    id = "pag-2-regiones",
+                                    options = [{"label": item["region"], "value": item["cod_region"]} for item in region_dict],
+                                    value = None,
+                                    multi = True,
+                                    placeholder = "Región..."
+                                )
+                            ]
                         ),
-                        html.Div(id = "pag-2-rango-fechas", style = {"display": "flex", "width": "100%", 
-                                                                        "padding-bottom": "0.5rem", "font-size": "10px", 
-                                                                        "justify-content": "center"})
-                    ],
-                    align = "center"
+                        dbc.Col(
+                            id = "pag-2-selectores-comuna",
+                            children = [
+                                html.Label(children = "Selecciona una o más comunas:",
+                                            id = "pag-2-small-label-comunas"),
+                                dcc.Dropdown(
+                                    id = "pag-2-comunas",
+                                    options = [{"label": item["comuna"], "value": item["comuna"]} for item in comuna_dict],
+                                    multi = True,
+                                    value = None,
+                                    placeholder = "Comuna..."
+                                )
+                            ]
+                        ),
+                        dbc.Col(
+                            id = "pag-2-selector-fecha",
+                            children = [
+                                html.Label(children = "Selecciona un rango de fechas:", 
+                                            id = "pag-2-small-label-fecha"),
+                                html.Div(
+                                    dcc.RangeSlider(
+                                        id = "pag-2-slider-fechas",
+                                        min = 0,
+                                        max = len(fechas) - 1,
+                                        allowCross = False,
+                                        value = [0, len(fechas) - 1],
+                                        step = 1
+                                    ),
+                                    id = "pag-2-real-selector"
+                                ),
+                                html.Div(id = "pag-2-rango-fechas", 
+                                            style = {"display": "flex", "width": "100%", 
+                                            "padding-bottom": "0.5rem", "font-size": "10px", 
+                                            "justify-content": "center"}
+                                )
+                            ],
+                            align = "center"
+                        )
+                    ]
+                ),
+                dbc.Row(
+                    id = "pag-2-fila-3-grafico",
+                    children = [dbc.Col(id = "pag-2-columna-1-grafico")]
                 )
             ]
         ),
         dbc.Row(
-            id = "pag-2-fila-3-grafico",
-            children = [dbc.Col(id = "pag-2-columna-1-grafico")]
-        ),
-        dbc.Row(
-            id = "pag-2-fila-4-footer",
+            id = "pie-pag-2",
             children = [
                 dbc.Col(
-                    id = "pag-2-columna-1-footer",
+                    id = "footer-pag-2",
                     children = [dcc.Markdown(children = footer)]
                 )
             ]

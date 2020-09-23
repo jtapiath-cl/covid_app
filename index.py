@@ -1,3 +1,7 @@
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output, State
+
 isdev = False
 
 if isdev:
@@ -7,15 +11,11 @@ else:
     environment = "production"
     run_port = 8050
 
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, Output, State
+import os
+os.environ["FLASK_ENV"] = environment
 
 from src import setup_env as se
 se.set_environment()
-
-import os
-os.environ["FLASK_ENV"] = environment
 
 from app import app
 from apps import app1, app2, app3, app4, sidebar
@@ -36,7 +36,6 @@ app.layout = html.Div(
 )
 def toggle_active_links(pathname):
     if pathname == "/":
-        # Treat page 1 as the homepage / index
         return True, False, False, False
     return [pathname == f"/page-{i}" for i in range(1, 5)]
 
