@@ -18,7 +18,10 @@ SIDEBAR_STYLE = {
 
 sidebar_header = dbc.Row(
     [
-        dbc.Col(html.H2("COVID", className="display-4")),
+        dbc.Col(
+            html.H2(html.A("COVID", href = "/page-1"),
+            className="display-4",)
+        ),
         dbc.Col(
             html.Button(
                 html.Span(className="navbar-toggler-icon"),
@@ -49,6 +52,7 @@ sidebar_layout = html.Div(
         dbc.Collapse(
             dbc.Nav(
                 [
+                    dbc.NavLink("Vista rápida", href = "/page-5", id = "page-5-link"),
                     dbc.NavLink("Evolución", href = "/page-1", id = "page-1-link"),
                     dbc.NavLink("Totales", href = "/page-2", id = "page-2-link"),
                     dbc.NavLink("Incrementos", href = "/page-3", id = "page-3-link"),
