@@ -164,8 +164,7 @@ layout = dbc.Container(
                         dbc.Col(
                             id = "pag-3-selectores-region",
                             children = [
-                                html.Label(children = "Selecciona una región:",
-                                            id = "pag-3-small-label"),
+                                html.Label("Selecciona una región:"),
                                 dcc.Dropdown(
                                     id = "pag-3-regiones",
                                     options = [{"label": item["region"], "value": item["cod_region"]} for item in region_dict],
@@ -178,8 +177,7 @@ layout = dbc.Container(
                         dbc.Col(
                             id = "pag-3-selectores-comuna",
                             children = [
-                                html.Label(children = "Selecciona una comuna:",
-                                            id = "pag-3-small-label"),
+                                html.Label("Selecciona una comuna:"),
                                 dcc.Dropdown(
                                     id = "pag-3-comunas",
                                     options = [{"label": item["comuna"], "value": item["comuna"]} for item in comuna_dict],
