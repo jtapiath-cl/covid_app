@@ -1,7 +1,5 @@
 #!/bin/bash
 
-git pull
-
 docker stop covid_app
 
 python3 setup.py
