@@ -36,7 +36,7 @@ app.layout = html.Div(
 )
 def toggle_active_links(pathname):
     if pathname == "/":
-        return True, False, False, False, False
+        return False, False, False, False, True
     return [pathname == f"/page-{i}" for i in range(1, 6)]
 
 
@@ -45,16 +45,16 @@ def toggle_active_links(pathname):
     [Input("url", "pathname")]
 )
 def display_page(pathname):
-    if pathname in ["/", "/page-1"]:
-        return app2.layout
+    if pathname in ["/", "/page-5"]:
+        return app5.layout
     elif pathname == "/page-2":
         return app1.layout
     elif pathname == "/page-3":
         return app3.layout
     elif pathname == "/page-4":
         return app4.layout
-    elif pathname == "/page-5":
-        return app5.layout
+    elif pathname == "/page-1":
+        return app2.layout
     else:
         return "404: Not found"
 

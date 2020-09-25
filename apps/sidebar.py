@@ -19,7 +19,7 @@ SIDEBAR_STYLE = {
 sidebar_header = dbc.Row(
     [
         dbc.Col(
-            html.H2(html.A("COVID", href = "/page-1"),
+            html.H2(html.A("COVID", href = "/page-5"),
             className="display-4",)
         ),
         dbc.Col(
