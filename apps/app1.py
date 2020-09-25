@@ -98,7 +98,7 @@ layout = dbc.Container(
                     id = "pag-1-columna-1",
                     children = [
                         html.H2(children = "Contagios totales"),
-                        html.P(children = parrafo, id = "pag-1-page-desc")
+                        html.P(children = parrafo)
                     ]
                 )
             ]

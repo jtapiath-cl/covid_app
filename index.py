@@ -2,7 +2,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-isdev = False
+isdev = True
 
 if isdev:
     environment = "development"
@@ -18,7 +18,7 @@ from src import setup_env as se
 se.set_environment()
 
 from app import app
-from apps import app1, app2, app3, app4, sidebar
+from apps import app1, app2, app3, app4, app5, sidebar
 
 content = html.Div(id="page-content")
 
@@ -31,13 +31,13 @@ app.layout = html.Div(
             )
 
 @app.callback(
-    [Output(f"page-{i}-link", "active") for i in range(1, 5)],
+    [Output(f"page-{i}-link", "active") for i in range(1, 6)],
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
     if pathname == "/":
-        return True, False, False, False
-    return [pathname == f"/page-{i}" for i in range(1, 5)]
+        return False, False, False, False, True
+    return [pathname == f"/page-{i}" for i in range(1, 6)]
 
 
 @app.callback(
@@ -45,14 +45,16 @@ def toggle_active_links(pathname):
     [Input("url", "pathname")]
 )
 def display_page(pathname):
-    if pathname in ["/", "/page-1"]:
-        return app2.layout
+    if pathname in ["/", "/page-5"]:
+        return app5.layout
     elif pathname == "/page-2":
         return app1.layout
     elif pathname == "/page-3":
         return app3.layout
     elif pathname == "/page-4":
         return app4.layout
+    elif pathname == "/page-1":
+        return app2.layout
     else:
         return "404: Not found"
 
